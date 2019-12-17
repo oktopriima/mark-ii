@@ -9,7 +9,7 @@ import (
 func PingController(ctx *gin.Context) {
 	cfg := conf.NewConfig()
 
-	err, db := conf.MysqlConnection(cfg)
+	db, err := conf.MysqlConnection(cfg)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

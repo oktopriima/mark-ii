@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func MysqlConnection(cfg Config) (err error, db *gorm.DB) {
+func MysqlConnection(cfg Config) (db *gorm.DB, err error) {
 	dbUser := cfg.GetString(`mysql.user`)
 	dbPass := cfg.GetString(`mysql.pass`)
 	dbName := cfg.GetString(`mysql.database`)
@@ -14,7 +14,7 @@ func MysqlConnection(cfg Config) (err error, db *gorm.DB) {
 
 	db, err = gorm.Open("mysql", ""+dbUser+":"+dbPass+"@tcp("+dbHost+":"+dbPort+")/"+dbName+"?charset=utf8&parseTime=True&loc=Local")
 	if err != nil {
-		return err, nil
+		return
 	}
 
 	return
