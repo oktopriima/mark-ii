@@ -49,6 +49,16 @@ func CreateController(ctx *gin.Context) {
 		return
 	}
 
+	passTemp, err := conf.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	user.Password = passTemp
+
 	err = userContract.Create(user, tx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -98,7 +108,7 @@ func FindController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusBadRequest, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"data": data,
 	})
 	return
