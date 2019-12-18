@@ -1,9 +1,11 @@
 package users
 
-import "time"
+import (
+	"time"
+)
 
 type CrateRequest struct {
 	Name     string    `json:"name" form:"name" binding:"required"`
-	Email    string    `json:"email" form:"email"`
-	Birthday time.Time `json:"birthday" form:"birthday" binding:"required,createuservalidator"`
+	Email    string    `json:"email" form:"email" binding:"email"`
+	Birthday time.Time `json:"birthday" form:"birthday" binding:"required"`
 }

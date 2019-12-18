@@ -1,15 +1,13 @@
 package user
 
 import (
-	"gopkg.in/go-playground/validator.v8"
-	"reflect"
+	"gopkg.in/go-playground/validator.v9"
 	"time"
 )
 
-func CreateUserValidator(v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value,
-	field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string, ) bool {
-
-	if date, ok := field.Interface().(time.Time); ok {
+var CreateUserValidator validator.Func = func(fl validator.FieldLevel) bool {
+	date, ok := fl.Field().Interface().(time.Time)
+	if ok {
 		today := time.Now()
 		if today.Before(date) {
 			return false

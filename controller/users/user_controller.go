@@ -8,8 +8,6 @@ import (
 	"github.com/oktopriima/mark-ii/model"
 	"github.com/oktopriima/mark-ii/request/users"
 	"github.com/oktopriima/mark-ii/services"
-	"github.com/oktopriima/mark-ii/validation/user"
-	"gopkg.in/go-playground/validator.v8"
 	"net/http"
 	"runtime"
 )
@@ -29,11 +27,8 @@ func CreateController(ctx *gin.Context) {
 	}
 
 	var req users.CrateRequest
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("createuservalidator", user.CreateUserValidator)
-	}
 
-	if err = ctx.ShouldBind(&req); err != nil {
+	if err = ctx.ShouldBindWith(&req, binding.Form); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
