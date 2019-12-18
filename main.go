@@ -14,6 +14,8 @@ func main() {
 	{
 		userRoute := r.Group("user")
 		userRoute.POST("", users.CreateController)
+		userRoute.GET(":id", users.FindController)
+		userRoute.GET("", users.FindByController)
 		//userRoute.PUT("", )
 		//userRoute.GET("", )
 		//userRoute.GET(":id", )

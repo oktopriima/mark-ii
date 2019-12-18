@@ -11,9 +11,12 @@ import (
 	"github.com/oktopriima/mark-ii/validation/user"
 	"gopkg.in/go-playground/validator.v8"
 	"net/http"
+	"runtime"
 )
 
 func CreateController(ctx *gin.Context) {
+	runtime.GOMAXPROCS(2)
+
 	var err error
 	cfg := conf.NewConfig()
 
@@ -26,7 +29,6 @@ func CreateController(ctx *gin.Context) {
 	}
 
 	var req users.CrateRequest
-	//err = ctx.ShouldBind(&req)
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("createuservalidator", user.CreateUserValidator)
 	}
@@ -65,5 +67,86 @@ func CreateController(ctx *gin.Context) {
 		"message": "OK",
 	})
 
+	return
+}
+
+func FindController(ctx *gin.Context) {
+	runtime.GOMAXPROCS(2)
+
+	var err error
+	cfg := conf.NewConfig()
+
+	db, err := conf.MysqlConnection(cfg)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var req users.FindRequest
+
+	if err = ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	userContract := services.NewUserServiceContract(db)
+	data, err := userContract.Find(1)
+
+	if err = ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"data": data,
+	})
+	return
+}
+
+func FindByController(ctx *gin.Context) {
+	runtime.GOMAXPROCS(2)
+
+	var err error
+	cfg := conf.NewConfig()
+
+	db, err := conf.MysqlConnection(cfg)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var req users.FindRequest
+
+	if err = ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	userContract := services.NewUserServiceContract(db)
+	criteria := make(map[string]interface{})
+	criteria["email"] = req.Email
+
+	data, err := userContract.FindBy(criteria)
+
+	if err = ctx.ShouldBind(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"data": data,
+	})
 	return
 }
