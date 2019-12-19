@@ -1,7 +1,6 @@
 package users
 
 import (
-	"crypto/md5"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/copier"
@@ -9,7 +8,6 @@ import (
 	"github.com/oktopriima/mark-ii/model"
 	"github.com/oktopriima/mark-ii/request/users"
 	"github.com/oktopriima/mark-ii/services"
-	"io"
 	"net/http"
 	"runtime"
 )
@@ -51,17 +49,13 @@ func CreateController(ctx *gin.Context) {
 		return
 	}
 
-	//passTemp, err := conf.HashPassword(req.Password)
-	//if err != nil {
-	//	ctx.JSON(http.StatusBadRequest, gin.H{
-	//		"message": err.Error(),
-	//	})
-	//	return
-	//}
-
-	h := md5.New()
-	io.WriteString(h, req.Password)
-	passTemp := h.Sum(nil)
+	passTemp, err := conf.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 
 	user.Password = string(passTemp)
 
@@ -97,7 +91,7 @@ func FindController(ctx *gin.Context) {
 
 	var req users.FindRequest
 
-	if err = ctx.ShouldBind(&req); err != nil {
+	if err = ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -105,7 +99,7 @@ func FindController(ctx *gin.Context) {
 	}
 
 	userContract := services.NewUserServiceContract(db)
-	data, err := userContract.Find(1)
+	data, err := userContract.Find(req.ID)
 
 	if err = ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
