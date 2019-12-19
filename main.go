@@ -12,10 +12,8 @@ import (
 func main() {
 	r := gin.Default()
 
-	signinKey := "secret"
-	jwtmiddleware.InitJWTMiddlewareCustom([]byte(signinKey), jwt.SigningMethodHS512)
-
-	r.Use(jwtmiddleware.CORSMiddleware())
+	signInKey := "secret"
+	jwtmiddleware.InitJWTMiddlewareCustom([]byte(signInKey), jwt.SigningMethodHS512)
 
 	r.POST("ping", ping.PingController)
 

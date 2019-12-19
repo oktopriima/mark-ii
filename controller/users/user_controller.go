@@ -8,6 +8,7 @@ import (
 	"github.com/oktopriima/mark-ii/model"
 	"github.com/oktopriima/mark-ii/request/users"
 	"github.com/oktopriima/mark-ii/services"
+	"github.com/oktopriima/mark-v/httpresponse"
 	"net/http"
 	"runtime"
 )
@@ -83,34 +84,21 @@ func FindController(ctx *gin.Context) {
 
 	db, err := conf.MysqlConnection(cfg)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		httpresponse.NewErrorException(ctx, http.StatusBadRequest, err)
 		return
 	}
 
 	var req users.FindRequest
 
 	if err = ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		httpresponse.NewErrorException(ctx, http.StatusBadRequest, err)
 		return
 	}
 
 	userContract := services.NewUserServiceContract(db)
 	data, err := userContract.Find(req.ID)
 
-	if err = ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": data,
-	})
+	httpresponse.NewSuccessResponse(ctx, data)
 	return
 }
 
@@ -120,40 +108,26 @@ func FindByController(ctx *gin.Context) {
 
 	db, err := conf.MysqlConnection(cfg)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		httpresponse.NewErrorException(ctx, http.StatusBadRequest, err)
 		return
 	}
 
 	var req users.FindRequest
 
 	if err = ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		httpresponse.NewErrorException(ctx, http.StatusBadRequest, err)
 		return
 	}
 
 	userContract := services.NewUserServiceContract(db)
-	//criteria := make(map[string]interface{})
-	//criteria["email"] = req.Email
 
 	data, err := userContract.FindBy(nil)
 
 	if err = ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
+		httpresponse.NewErrorException(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	ctx.JSON(http.StatusBadRequest, gin.H{
-		"data": data,
-	})
+	httpresponse.NewSuccessResponse(ctx, data)
 	return
-}
-
-func UpdateController(ctx *gin.Context) {
-
 }
