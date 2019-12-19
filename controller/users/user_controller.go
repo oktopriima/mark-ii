@@ -1,6 +1,7 @@
 package users
 
 import (
+	"crypto/md5"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/copier"
@@ -8,12 +9,13 @@ import (
 	"github.com/oktopriima/mark-ii/model"
 	"github.com/oktopriima/mark-ii/request/users"
 	"github.com/oktopriima/mark-ii/services"
+	"io"
 	"net/http"
 	"runtime"
 )
 
 func CreateController(ctx *gin.Context) {
-	runtime.GOMAXPROCS(2)
+	runtime.GOMAXPROCS(1)
 
 	var err error
 	cfg := conf.NewConfig()
@@ -49,15 +51,19 @@ func CreateController(ctx *gin.Context) {
 		return
 	}
 
-	passTemp, err := conf.HashPassword(req.Password)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
+	//passTemp, err := conf.HashPassword(req.Password)
+	//if err != nil {
+	//	ctx.JSON(http.StatusBadRequest, gin.H{
+	//		"message": err.Error(),
+	//	})
+	//	return
+	//}
 
-	user.Password = passTemp
+	h := md5.New()
+	io.WriteString(h, req.Password)
+	passTemp := h.Sum(nil)
+
+	user.Password = string(passTemp)
 
 	err = userContract.Create(user, tx)
 	if err != nil {
@@ -115,8 +121,6 @@ func FindController(ctx *gin.Context) {
 }
 
 func FindByController(ctx *gin.Context) {
-	runtime.GOMAXPROCS(2)
-
 	var err error
 	cfg := conf.NewConfig()
 
@@ -138,10 +142,10 @@ func FindByController(ctx *gin.Context) {
 	}
 
 	userContract := services.NewUserServiceContract(db)
-	criteria := make(map[string]interface{})
-	criteria["email"] = req.Email
+	//criteria := make(map[string]interface{})
+	//criteria["email"] = req.Email
 
-	data, err := userContract.FindBy(criteria)
+	data, err := userContract.FindBy(nil)
 
 	if err = ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -154,4 +158,8 @@ func FindByController(ctx *gin.Context) {
 		"data": data,
 	})
 	return
+}
+
+func UpdateController(ctx *gin.Context) {
+
 }
