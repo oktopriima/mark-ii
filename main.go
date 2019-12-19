@@ -15,7 +15,8 @@ func main() {
 	signInKey := "secret"
 	jwtmiddleware.InitJWTMiddlewareCustom([]byte(signInKey), jwt.SigningMethodHS512)
 
-	r.POST("ping", ping.PingController)
+	r.Use(jwtmiddleware.CORSMiddleware())
+	r.GET("ping", ping.PingController)
 
 	{
 		userRoute := r.Group("user")
